@@ -3,10 +3,38 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-	<ListView
-		android:id="@+id/list"
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent">
-	</ListView>
-
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+    </ListView>
+    <LinearLayout
+            android:background="#efefef"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_width="fill_parent"
+            android:layout_height="50dip"
+            android:orientation="horizontal">
+        <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/prev"
+                android:text="prev"
+                android:layout_width="wrap_content" />
+        <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/play"
+                android:text="play"
+                android:layout_width="wrap_content" />
+        <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/stop"
+                android:text="stop"
+                android:layout_width="wrap_content" />
+        <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/next"
+                android:text="next"
+                android:layout_width="wrap_content" />
+    </LinearLayout>
 </LinearLayout>
