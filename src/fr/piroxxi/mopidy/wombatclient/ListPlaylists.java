@@ -41,7 +41,8 @@ public class ListPlaylists extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				new CallAction().execute("clear",
-						"load \"" + values.get(position) + "\"");
+						"load \"" + values.get(position) + "\"",
+						"play");
 			}
 		});
 
