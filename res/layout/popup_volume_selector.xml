@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativeLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background"
+    android:padding="4dp" >
+
+    <SeekBar
+        android:id="@+id/seekBar1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:max="100"
+	    android:progressDrawable="@drawable/apptheme_scrubber_progress_horizontal_holo_light"
+        android:thumb="@drawable/apptheme_scrubber_control_selector_holo_light" />
+</RelativeLayout>

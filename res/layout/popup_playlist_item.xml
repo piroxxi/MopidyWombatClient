@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/playlistItemPopupLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:orientation="vertical"
+    android:background="#AA000000">
+
+    <TextView
+        android:id="@+id/playlist_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left|center_vertical"
+        android:padding="10dp"
+        android:textColor="@color/text"
+        android:textSize="18sp" 
+		android:background="@drawable/bottomborder" />
+
+    <Button
+        android:id="@+id/inspect_button"
+    	style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/button_inspect"
+    	android:textColor="@color/text"
+        android:gravity="left|center_vertical"
+        android:text="@string/button_inspect_description" />
+    <Button
+        android:id="@+id/add_button"
+    	style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/button_plus"
+    	android:textColor="@color/text"
+        android:gravity="left|center_vertical"
+        android:text="@string/button_add_description" />
+    <Button
+        android:id="@+id/play_button"
+    	style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/button_play_small"
+    	android:textColor="@color/text"
+        android:gravity="left|center_vertical"
+        android:text="@string/button_play_description" />
+</LinearLayout>

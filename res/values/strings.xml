@@ -4,5 +4,22 @@
     <string name="app_name">MopidyWombatClient</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="title_activity_list_songs_in_playlist">ListSongsInPlaylist</string>
+    <string name="drawer_open">Open Menu</string>
+    <string name="drawer_close">Close Menu</string>
+    <string name="button_add_description">Add songs</string>
+    <string name="button_play_description">Play</string>
+    <string name="button_inspect_description">Show</string>
+    <string name="previous">Previous</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="next">Next</string>
+    <string name="volume">Volume</string>
+    <string name="repeat">Repeat</string>
+    <string name="random">Random</string>
 
 </resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text">#CDFFFFFF</color>
+    <color name="background">#FF121314</color>
+    <color name="background_transparent">#AA121314</color>
+    <color name="background_light">#FF222326</color>
+    <color name="selected_menu_item">#FF313337</color>
+</resources>

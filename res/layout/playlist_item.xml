@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/playlistItemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+	android:background="@drawable/bottomborder"
+    android:weightSum="11" >
+
+    <TextView
+        android:id="@+id/playlistName"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="10"
+        android:paddingLeft="5dp"
+        android:paddingBottom="3dp"
+    	android:textSize="17sp"
+        android:text="Playlist"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/text" />
+	
+	<!--
+    <ImageButton
+        android:id="@+id/inspect_button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:scaleType="fitStart"
+        android:contentDescription="@string/button_inspect_description"
+        android:src="@drawable/button_inspect" />
+    <ImageButton
+        android:id="@+id/add_button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:scaleType="fitStart"
+        android:contentDescription="@string/button_add_description"
+        android:src="@drawable/button_plus" />
+    <ImageButton
+        android:id="@+id/play_button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:scaleType="fitStart"
+        android:contentDescription="@string/button_play_description"
+        android:src="@drawable/button_play" />
+    -->
+    <ImageButton
+        android:id="@+id/show_more"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:scaleType="fitStart"
+        android:contentDescription="@string/button_play_description"
+        android:src="@drawable/more" />
+
+</LinearLayout>
