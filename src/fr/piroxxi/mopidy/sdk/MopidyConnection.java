@@ -1,6 +1,7 @@
 package fr.piroxxi.mopidy.sdk;
 
 
+
 /**
  * It's quit complex to call the MPD server. It requires to 
  * create a TCP connection, to launch the command and to wait
@@ -11,10 +12,10 @@ package fr.piroxxi.mopidy.sdk;
  * @author PiroXXI
  */
 public class MopidyConnection {
-	private int port;
+	private String port;
 	private String address;
 	
-	public MopidyConnection(String address, int port) {
+	public MopidyConnection(String address, String port) {
 		this.address = address;
 		this.port = port;
 	}
@@ -28,5 +29,19 @@ public class MopidyConnection {
 	 */
 	public void executeCommand(MopidyCommandCallback callback, String... commands){
 		new MopidyConnectionAsychronousTask(address,port,callback).execute(commands);
+	}
+
+	// FIXME
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	// FIXME
+	public void setPort(String port) {
+		try{
+			this.port = port;
+		}catch(Exception e){
+			return;
+		}
 	}
 }

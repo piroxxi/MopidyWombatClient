@@ -8,43 +8,56 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import fr.piroxxi.mopidy.sdk.MopidyConnection;
 import fr.piroxxi.mopidy.sdk.MopidyDefaultCommandCallback;
+import fr.piroxxi.mopidy.sdk.playlist.tree.PlaylistItem;
+import fr.piroxxi.mopidy.sdk.playlist.tree.PlaylistTree;
 
 public class ListPlaylists extends Activity {
+	public static final String PREFS_NAME = "PreferencesMopidy";
+	
 	/*
 	 * TODO(rpoittevin) Gérée les cas de texte accentué (UTF8 ?) pour pouvoir
 	 * avoir des caracteres spéciaux dans les noms de playlist
 	 * 
 	 * TODO(rpoittevin) Gérer plusieures vues (Playlist en cours de lecture,
 	 * Liste des playlists)
+	 * 
+	 * TODO(rpoittevin) Faire une vraie page de parametres; avec un meilleure
+	 * gestion du stockage (créer le stockage si il n'existe pas, toujours se
+	 * baser dessus... (en profiter pour enlever ce "connection" en statique) ).
+	 * Egalement, il faudrait ajouter la notion "mise à jour des params"...
+	 * qui va également avec la notion de "message d'erreure" lorsqu'il y a pas
+	 * de parametres...
 	 */
-	private ArrayAdapter<String> adapter;
+	private ArrayAdapter<PlaylistItem> adapter;
+	private static PlaylistTree playlistTree = new PlaylistTree("");
+	private ArrayList<PlaylistItem> values = new ArrayList<PlaylistItem>();
+	
 	private ArrayAdapter<String> menuAdapter;
-	private ArrayList<String> values = new ArrayList<String>();
 	private ArrayList<String> menuValues = new ArrayList<String>();
 	{
 		menuValues.add("Playlist en cours");
@@ -52,8 +65,7 @@ public class ListPlaylists extends Activity {
 		menuValues.add("Préferences");
 	}
 
-	private MopidyConnection connection = new MopidyConnection("192.168.0.9",
-			6600);
+	public static MopidyConnection connection = new MopidyConnection("192.168.0.9", "6600");
 
 	private Handler repeatedHandler = new Handler();
 	private Runnable newRunnable = new Runnable() {
@@ -68,18 +80,11 @@ public class ListPlaylists extends Activity {
 			}, "currentsong");
 		}
 	};
-
-	private int volume;
-	private int repeat;
-	private ImageButton repeatButton;
-	private int random;
-	private ImageButton randomButton;
-
-	// The "x" and "y" position of the "Show Button" on screen.
-	Point p;
+	
 	private ActionBarDrawerToggle menuToggle;
 
 	private String previousSong = null;
+
 	protected void postSongNameNotification(List<String> results) {
 		String title = "";
 		String album = "";
@@ -129,44 +134,100 @@ public class ListPlaylists extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list_playlists);
 
+		Intent intent = getIntent();
+		final String folderName = intent.getStringExtra("folder-name");
+		
+		SharedPreferences settings = getSharedPreferences(ListPlaylists.PREFS_NAME, 0);
+		String addresse = settings.getString("addresse", "192.168.0.9");
+		String port = settings.getString("port", "6600");
+		connection.setAddress(addresse);
+		connection.setPort(port);
+
+//		sharedPref = getSharedPreferences("preferences", Context.MODE_PRIVATE);
+//		ListPlaylists.connection.setAddress(sharedPref.getString(getString(R.string.server_address), "192.168.0.9"));
+//		ListPlaylists.connection.setPort(sharedPref.getString(getString(R.string.server_port), "6600"));
+		
 		// Get ListView object from xml
 		ListView listView = (ListView) findViewById(R.id.list);
 		final ListView menuListView = (ListView) findViewById(R.id.left_drawer);
 
+		if( folderName != null ){
+			/* Si le folderName est setted, on a pas besoin de recharger les playlists */
+			String[] levels = folderName.split("\\|");
+			PlaylistTree treeLevel = ListPlaylists.playlistTree;
+			for(int i=0 ; i < levels.length ; i++ ){
+				for( PlaylistItem item : treeLevel.getSubTrees() ){
+					if(item.getPlaylistName().equals(levels[i]) ){
+						if( i == (levels.length - 1) ){
+							values.clear();
+							for( PlaylistItem subItem : ((PlaylistTree)item).getSubTrees() ){
+								values.add(subItem);
+							}
+						}else{
+							treeLevel = ((PlaylistTree)item);
+						}
+					}
+				}
+			}
+		}
+		
 		// new adapter to be updated
-		adapter = new ArrayAdapter<String>(this, 0, values) {
+		adapter = new ArrayAdapter<PlaylistItem>(this, 0, values) {
 			@Override
 			public View getView(final int position, View convertView, ViewGroup parent) {
 				LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(R.layout.playlist_item, parent, false);
-				TextView text = ((TextView) view.findViewById(R.id.playlistName));
-				text.setText(this.getItem(position));
-				text.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						connection.executeCommand(new MopidyDefaultCommandCallback() {
-							@Override
-							public void success(List<String> results) {
-								postSongNameNotification(results);
-								repeatedHandler.postDelayed(newRunnable, 1200);
-							}
-						}, "clear", "load \"" + values.get(position) + "\"", "play","currentsong");
-					}
-				});
-				text.setOnLongClickListener(new View.OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						showPlaylistItemPopup(ListPlaylists.this, values.get(position));
-						return true;
-					}
-				});
-				((ImageButton) view.findViewById(R.id.show_more))
-					.setOnClickListener(new View.OnClickListener() {
+				View view;
+				
+				// Si l'element values.get(position) est un arbre (subtree), on affiche un bouton "+"
+				if( values.get(position) instanceof PlaylistTree ){
+					view = inflater.inflate(R.layout.playlist_folder, parent, false);
+					TextView text = ((TextView) view.findViewById(R.id.folderName));
+					text.setText(this.getItem(position).getPlaylistName());
+
+					text.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							showPlaylistItemPopup(ListPlaylists.this, values.get(position));
+							Intent intent = new Intent(ListPlaylists.this, ListPlaylists.class);
+							if( folderName != null ){
+								intent.putExtra("folder-name", folderName+"|"+values.get(position).getPlaylistName());
+							}else{
+								intent.putExtra("folder-name", values.get(position).getPlaylistName());
+							}
+							startActivity(intent);
 						}
 					});
+				}else{
+					view = inflater.inflate(R.layout.playlist_item, parent, false);
+					TextView text = ((TextView) view.findViewById(R.id.playlistName));
+					text.setText(this.getItem(position).getPlaylistName());
+
+					text.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							connection.executeCommand(new MopidyDefaultCommandCallback() {
+								@Override
+								public void success(List<String> results) {
+									postSongNameNotification(results);
+									repeatedHandler.postDelayed(newRunnable, 1200);
+								}
+							}, "clear", "load \"" + values.get(position).getPlaylistFullName() + "\"", "play","currentsong");
+						}
+					});
+					text.setOnLongClickListener(new View.OnLongClickListener() {
+						@Override
+						public boolean onLongClick(View v) {
+							showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName());
+							return true;
+						}
+					});
+					((ImageButton) view.findViewById(R.id.show_more))
+						.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName());
+							}
+						});
+				}
 				return view;
 			}
 		};
@@ -176,7 +237,7 @@ public class ListPlaylists extends Activity {
 				R.layout.left_drawer_item, menuValues);
 		menuListView.setAdapter(menuAdapter);
 
-		DrawerLayout menuLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		final DrawerLayout menuLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		menuToggle = new ActionBarDrawerToggle(this, /* host Activity */
 		menuLayout, /* DrawerLayout object */
 		R.drawable.ic_launcher, /* nav drawer icon to replace 'Up' caret */
@@ -199,6 +260,15 @@ public class ListPlaylists extends Activity {
 				View firstChild = menuListView.getChildAt(1);
 				firstChild.setBackgroundColor(getResources().getColor(
 						R.color.selected_menu_item));
+				menuListView.setOnItemClickListener(new OnItemClickListener() {
+				    public void onItemClick(AdapterView<?> parent, View v, int position, long id){
+				        if( "Préferences".equals(menuListView.getItemAtPosition(position)) ){
+							Intent intent = new Intent(ListPlaylists.this, PreferenceActivity.class);
+							startActivity(intent);
+							menuLayout.closeDrawers();
+				        }
+				    }
+				});
 			}
 		};
 
@@ -206,128 +276,40 @@ public class ListPlaylists extends Activity {
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		/* Mise a jour contenu liste */
-		connection.executeCommand(new MopidyDefaultCommandCallback() {
-			@Override
-			public void success(List<String> results) {
-				for (String result : results) {
-					if (result.startsWith("playlist: "))
-						adapter.add(result.substring("playlist: ".length()));
+		if( folderName == null ){
+			/* Mise a jour contenu liste */
+			connection.executeCommand(new MopidyDefaultCommandCallback() {
+				@Override
+				public void success(List<String> results) {
+					ListPlaylists.playlistTree.getSubTrees().clear();
+					values.clear();
+					
+					/* Creating the tree */
+					for (String result : results) {
+						if (result.startsWith("playlist: ")) {
+							String[] words = result.substring("playlist: ".length())
+									.split("\\| ");
+							ListPlaylists.playlistTree.addPlaylist(words, result.substring("playlist: ".length()));
+						}
+						if (result.equals("OK"))
+							break;
+					}
+					
+					for( PlaylistItem item : ListPlaylists.playlistTree.getSubTrees() ){
+						values.add(item);
+	//					adapter.add(item);
+					}
+					
+					adapter.notifyDataSetChanged();
 				}
-				adapter.notifyDataSetChanged();
-			}
-		}, "listplaylists");
-		connection.executeCommand(new MopidyDefaultCommandCallback() {
-			@Override
-			public void success(List<String> results) {
-				for (String l : results) {
-					if (l.startsWith("volume: "))
-						volume = Integer.parseInt(l.substring("volume: "
-								.length()));
-					if (l.startsWith("repeat: "))
-						repeat = Integer.parseInt(l.substring("repeat: "
-								.length()));
-					if (l.startsWith("random: "))
-						random = Integer.parseInt(l.substring("random: "
-								.length()));
-				}
-
-				if( repeat == 0 ){
-					repeatButton.setImageResource(R.drawable.button_repeat_inactive);
-				}else{
-					repeatButton.setImageResource(R.drawable.button_repeat);
-				}
-				if( random == 0 ){
-					randomButton.setImageResource(R.drawable.button_random_inactive);
-				}else{
-					randomButton.setImageResource(R.drawable.button_random);
-				}
-			}
-		}, "status");
-
+			}, "listplaylists");
+		}
+		
 		/*
 		 * Each 500ms, a the message with the current title will be updated;
 		 */
 		// repeatedHandler.post(newRunnable);
 		repeatedHandler.postDelayed(newRunnable, 500);
-
-		((ImageButton) findViewById(R.id.prev))
-			.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					connection.executeCommand(null, "previous");
-				}
-			});
-		((ImageButton) findViewById(R.id.play))
-			.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					connection.executeCommand(null, "play");
-				}
-			});
-		((ImageButton) findViewById(R.id.stop))
-			.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					connection.executeCommand(null, "stop");
-				}
-			});
-		((ImageButton) findViewById(R.id.next))
-			.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					connection.executeCommand(null, "next");
-				}
-			});
-		((ImageButton) findViewById(R.id.volume))
-			.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					/*
-					 * Open a popup with the volume level.
-					 * 
-					 * @see
-					 * http://androidresearch.wordpress.com/2012/05/06/how
-					 * -to-create-popups-in-android/
-					 */
-
-					// Open popup window
-					if (p != null)
-						showPopup(ListPlaylists.this, p);
-				}
-			});
-		
-		repeatButton = (ImageButton) findViewById(R.id.repeat);
-		repeatButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if( repeat == 0 ){
-						connection.executeCommand(null, "repeat 1");
-						repeat = 1;
-						repeatButton.setImageResource(R.drawable.button_repeat);
-					}else{
-						connection.executeCommand(null, "repeat 0");
-						repeat = 0;
-						repeatButton.setImageResource(R.drawable.button_repeat_inactive);
-					}
-				}
-			});
-		
-		randomButton = (ImageButton) findViewById(R.id.random);
-		randomButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if( random == 0 ){
-					connection.executeCommand(null, "random 1");
-					random = 1;
-					randomButton.setImageResource(R.drawable.button_random);
-				}else{
-					connection.executeCommand(null, "random 0");
-					random = 0;
-					randomButton.setImageResource(R.drawable.button_random_inactive);
-				}
-			}
-		});
 	}
 
 	// @see :
@@ -340,54 +322,6 @@ public class ListPlaylists extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	// The method that displays the popup.
-	private void showPopup(final Activity context, Point p) {
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		int popupWidth = size.x;
-		int popupHeight = repeatButton.getHeight();
-		
-
-		// Inflate the popup_layout.xml
-		RelativeLayout viewGroup = (RelativeLayout) context
-				.findViewById(R.id.relativeLayout1);
-		LayoutInflater layoutInflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = layoutInflater.inflate(R.layout.popup_volume_selector,
-				viewGroup);
-
-		// Creating the PopupWindow
-		final PopupWindow popup = new PopupWindow(context);
-		popup.setContentView(layout);
-		popup.setWidth(popupWidth);
-		popup.setHeight(popupHeight);
-		popup.setFocusable(true);
-
-		final SeekBar volume = (SeekBar) layout.findViewById(R.id.seekBar1);
-		volume.setProgress(ListPlaylists.this.volume);
-		volume.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-			}
-
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				connection.executeCommand(null,
-						"setvol " + seekBar.getProgress());
-				ListPlaylists.this.volume = seekBar.getProgress();
-			}
-		});
-		
-		// Clear the default translucent background
-		popup.setBackgroundDrawable(new BitmapDrawable());
-
-		// Displaying the popup at the specified location, + offsets.
-		popup.showAtLocation(layout, Gravity.NO_GRAVITY, 0 , p.y - repeatButton.getHeight());
-	}
-	
 	private void showPlaylistItemPopup(final Activity context, final String playlist) {
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -447,31 +381,8 @@ public class ListPlaylists extends Activity {
 					popup.dismiss();
 				}
 			});
-		
-		// Clear the default translucent background
-//		popup.setBackgroundDrawable(new BitmapDrawable());
 
 		// Displaying the popup at the specified location, + offsets.
 		popup.showAtLocation(layout, Gravity.NO_GRAVITY, (int)(size.x * 0.1), (int)(size.y * 0.25));
-	}
-
-	// Get the x and y position after the button is draw on screen
-	// (It's important to note that we can't get the position in the onCreate(),
-	// because at that stage most probably the view isn't drawn yet, so it will
-	// return (0, 0))
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-
-		int[] location = new int[2];
-		ImageButton button = (ImageButton) findViewById(R.id.volume);
-
-		// Get the x, y location and store it in the location[] array
-		// location[0] = x, location[1] = y.
-		button.getLocationOnScreen(location);
-
-		// Initialize the Point with x, and y positions
-		p = new Point();
-		p.x = location[0];
-		p.y = location[1];
 	}
 }

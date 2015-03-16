@@ -1,8 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background" >
+    android:background="@color/background"
+    android:orientation="vertical" >
 
     <ListView
         android:id="@+id/list"
@@ -13,4 +13,10 @@
 	    android:layout_marginRight="5dp">
     </ListView>
 
+    <fragment
+        android:id="@+id/control_bar_fragment"
+        android:name="fr.piroxxi.mopidy.wombatclient.ControlBarFragment"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp" >
+    </fragment>
 </LinearLayout>

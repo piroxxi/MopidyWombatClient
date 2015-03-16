@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/background_light"
+    android:orientation="horizontal"
+    android:weightSum="7" >
+
+    <ImageButton
+        android:id="@+id/prev"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/previous"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_prev" />
+
+    <ImageButton
+        android:id="@+id/stop"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/stop"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_stop" />
+
+    <ImageButton
+        android:id="@+id/play"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/play"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_play" />
+
+    <ImageButton
+        android:id="@+id/next"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/next"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_next" />
+
+    <ImageButton
+        android:id="@+id/volume"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/volume"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_volume" />
+
+    <ImageButton
+        android:id="@+id/repeat"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/repeat"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_repeat" />
+
+    <ImageButton
+        android:id="@+id/random"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:contentDescription="@string/random"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button_random" />
+
+</LinearLayout>

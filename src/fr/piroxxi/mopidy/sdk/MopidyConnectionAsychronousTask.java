@@ -14,12 +14,12 @@ import android.util.Log;
 public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, Long> {
 	
 	private String serverAddress;
-	private int port;
+	private String port;
 	private MopidyCommandCallback callback;
 	
 	private ArrayList<String> lines;
 
-	public MopidyConnectionAsychronousTask(String serverAddress, int port, MopidyCommandCallback callback){
+	public MopidyConnectionAsychronousTask(String serverAddress, String port, MopidyCommandCallback callback){
 		this.serverAddress = serverAddress;
 		this.port = port;
 		this.callback = callback;
@@ -34,7 +34,7 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 		}
 		
 		try {
-			Socket clientSocket = new Socket(serverAddress, port);
+			Socket clientSocket = new Socket(serverAddress, Integer.parseInt(port));
 			DataOutputStream outToServer = new DataOutputStream(
 					clientSocket.getOutputStream());
 			BufferedReader inFromServer = new BufferedReader(

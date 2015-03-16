@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/playlistItemLayout"
+    android:id="@+id/playlistFolderLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
@@ -12,11 +12,11 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_margin="3dp"
-        android:contentDescription="@string/playlist_icon"
-        android:src="@drawable/playlist_icon" />
+        android:contentDescription="@string/folder_icon"
+        android:src="@drawable/folder_icon" />
 
     <TextView
-        android:id="@+id/playlistName"
+        android:id="@+id/folderName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="10"
@@ -25,15 +25,5 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/text"
         android:textSize="20sp" />
-	
-    <ImageButton
-        android:id="@+id/show_more"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@null"
-        android:scaleType="fitStart"
-        android:contentDescription="@string/button_play_description"
-        android:src="@drawable/more" />
 
 </LinearLayout>

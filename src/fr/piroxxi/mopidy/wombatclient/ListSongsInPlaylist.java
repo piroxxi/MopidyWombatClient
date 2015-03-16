@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +21,7 @@ public class ListSongsInPlaylist extends Activity {
 	private ArrayList<String> values = new ArrayList<String>();
 
 	private MopidyConnection connection = new MopidyConnection("192.168.0.9",
-			6600);
+			"6600");
 	
 	private ArrayList<MopidySong> playlistSongs = new ArrayList<MopidySong>();
 	public class MopidySong{
@@ -40,6 +41,12 @@ public class ListSongsInPlaylist extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list_songs_in_playlist);
+
+		SharedPreferences settings = getSharedPreferences(ListPlaylists.PREFS_NAME, 0);
+		String addresse = settings.getString("addresse", "192.168.0.9");
+		String port = settings.getString("port", "6600");
+		connection.setAddress(addresse);
+		connection.setPort(port);
 		
 		// Get ListView object from xml
 		ListView listView = (ListView) findViewById(R.id.list);

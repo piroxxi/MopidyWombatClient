@@ -18,8 +18,7 @@
 
         <activity
             android:name="fr.piroxxi.mopidy.wombatclient.ListPlaylists"
-            android:label="@string/app_name"
-   			android:launchMode="singleInstance" >
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,6 +31,10 @@
         </activity>
         <activity
             android:name="fr.piroxxi.mopidy.wombatclient.NotificationDismissed" >
+        </activity>
+        <activity
+            android:name="fr.piroxxi.mopidy.wombatclient.PreferenceActivity"
+            android:label="@string/title_activity_preferences" >
         </activity>
     </application>
 
