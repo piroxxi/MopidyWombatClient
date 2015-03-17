@@ -43,13 +43,13 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 			
 			/* Send the command list */
 			if(actions.length > 1){
-				outToServer.writeBytes("command_list_begin\r\n");
+				outToServer.write(("command_list_begin\r\n").getBytes());
 				for (String action : actions) {
-					outToServer.writeBytes(action + "\r\n");
+					outToServer.write(new String((action + "\r\n").getBytes(),"UTF-8").getBytes());
 				}
-				outToServer.writeBytes("command_list_end\r\n");
+				outToServer.write(("command_list_end\r\n").getBytes());
 			}else{
-				outToServer.writeBytes(actions[0] + "\r\n");
+				outToServer.write(new String((actions[0] + "\r\n").getBytes(),"UTF-8").getBytes());
 			}
 			
 
