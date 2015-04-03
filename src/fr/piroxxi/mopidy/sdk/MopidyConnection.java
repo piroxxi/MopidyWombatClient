@@ -1,5 +1,7 @@
 package fr.piroxxi.mopidy.sdk;
 
+import android.content.Context;
+
 
 
 /**
@@ -12,6 +14,7 @@ package fr.piroxxi.mopidy.sdk;
  * @author PiroXXI
  */
 public class MopidyConnection {
+	private Context context;
 	private String port;
 	private String address;
 	
@@ -28,7 +31,7 @@ public class MopidyConnection {
 	 * TODO(rpoittevin) May have a "not waiting for answer" flag, to perform asynchronous actions.
 	 */
 	public void executeCommand(MopidyCommandCallback callback, String... commands){
-		new MopidyConnectionAsychronousTask(address,port,callback).execute(commands);
+		new MopidyConnectionAsychronousTask(context,address,port,callback).execute(commands);
 	}
 
 	// FIXME
@@ -43,5 +46,12 @@ public class MopidyConnection {
 		}catch(Exception e){
 			return;
 		}
+	}
+
+	public Context getContext() {
+		return this.context;
+	}
+	public void setContext(Context context) {
+		this.context = context;
 	}
 }

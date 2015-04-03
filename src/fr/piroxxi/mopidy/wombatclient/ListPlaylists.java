@@ -6,8 +6,10 @@ import java.util.List;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -15,7 +17,6 @@ import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import fr.piroxxi.mopidy.sdk.MopidyCommandCallback;
 import fr.piroxxi.mopidy.sdk.MopidyConnection;
 import fr.piroxxi.mopidy.sdk.MopidyDefaultCommandCallback;
 import fr.piroxxi.mopidy.sdk.playlist.tree.PlaylistItem;
@@ -38,7 +40,7 @@ import fr.piroxxi.mopidy.sdk.playlist.tree.PlaylistTree;
 
 public class ListPlaylists extends Activity {
 	public static final String PREFS_NAME = "PreferencesMopidy";
-	
+	public static final String EVENT_CONFIGURATION_UPDATED = "event_configuration_updated";
 	/*
 	 * TODO(rpoittevin) Gérée les cas de texte accentué (UTF8 ?) pour pouvoir
 	 * avoir des caracteres spéciaux dans les noms de playlist
@@ -71,11 +73,16 @@ public class ListPlaylists extends Activity {
 	private Runnable newRunnable = new Runnable() {
 		@Override
 		public void run() {
-			connection.executeCommand(new MopidyDefaultCommandCallback() {
+			connection.executeCommand(new MopidyCommandCallback() {
 				@Override
 				public void success(List<String> results) {
 					postSongNameNotification(results);
-					repeatedHandler.postDelayed(newRunnable, 1200);
+					repeatedHandler.postDelayed(newRunnable, 1800);
+				}
+
+				@Override
+				public void error(Throwable error, String... commands) {
+					// do nothing, we probably already know it's not working.
 				}
 			}, "currentsong");
 		}
@@ -84,6 +91,10 @@ public class ListPlaylists extends Activity {
 	private ActionBarDrawerToggle menuToggle;
 
 	private String previousSong = null;
+	private TextView loadingText;
+	private TextView errorText;
+	private LinearLayout listViewLayout;
+	private ListView menuListView;
 
 	protected void postSongNameNotification(List<String> results) {
 		String title = "";
@@ -133,7 +144,7 @@ public class ListPlaylists extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_list_playlists);
-
+		
 		Intent intent = getIntent();
 		final String folderName = intent.getStringExtra("folder-name");
 		
@@ -142,14 +153,19 @@ public class ListPlaylists extends Activity {
 		String port = settings.getString("port", "6600");
 		connection.setAddress(addresse);
 		connection.setPort(port);
+		connection.setContext(this.getApplicationContext());
 
 //		sharedPref = getSharedPreferences("preferences", Context.MODE_PRIVATE);
 //		ListPlaylists.connection.setAddress(sharedPref.getString(getString(R.string.server_address), "192.168.0.9"));
 //		ListPlaylists.connection.setPort(sharedPref.getString(getString(R.string.server_port), "6600"));
 		
+		loadingText = (TextView) findViewById(R.id.loading);
+		errorText = (TextView) findViewById(R.id.error);
+		
 		// Get ListView object from xml
 		ListView listView = (ListView) findViewById(R.id.list);
-		final ListView menuListView = (ListView) findViewById(R.id.left_drawer);
+		listViewLayout = (LinearLayout) findViewById(R.id.list_view_layout);
+		menuListView = (ListView) findViewById(R.id.left_drawer);
 
 		if( folderName != null ){
 			/* Si le folderName est setted, on a pas besoin de recharger les playlists */
@@ -169,6 +185,9 @@ public class ListPlaylists extends Activity {
 					}
 				}
 			}
+			loadingText.setVisibility(View.GONE);
+			errorText.setVisibility(View.GONE);
+			listViewLayout.setVisibility(View.VISIBLE);
 		}
 		
 		// new adapter to be updated
@@ -216,7 +235,7 @@ public class ListPlaylists extends Activity {
 					text.setOnLongClickListener(new View.OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
-							showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName());
+							showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName(), values.get(position).getPlaylistName());
 							return true;
 						}
 					});
@@ -224,7 +243,7 @@ public class ListPlaylists extends Activity {
 						.setOnClickListener(new View.OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName());
+								showPlaylistItemPopup(ListPlaylists.this, values.get(position).getPlaylistFullName(), values.get(position).getPlaylistName());
 							}
 						});
 				}
@@ -262,8 +281,14 @@ public class ListPlaylists extends Activity {
 						R.color.selected_menu_item));
 				menuListView.setOnItemClickListener(new OnItemClickListener() {
 				    public void onItemClick(AdapterView<?> parent, View v, int position, long id){
-				        if( "Préferences".equals(menuListView.getItemAtPosition(position)) ){
-							Intent intent = new Intent(ListPlaylists.this, PreferenceActivity.class);
+				    	if( "Préferences".equals(menuListView.getItemAtPosition(position)) ){
+				    		Intent intent = new Intent(ListPlaylists.this, PreferenceActivity.class);
+				    		startActivity(intent);
+				    		menuLayout.closeDrawers();
+				    	}
+				        if( "Playlist en cours".equals(menuListView.getItemAtPosition(position)) ){
+							Intent intent = new Intent(ListPlaylists.this, ListSongsInPlaylist.class);
+							intent.putExtra("playlist-name", "CURRENT_SONGS");
 							startActivity(intent);
 							menuLayout.closeDrawers();
 				        }
@@ -278,38 +303,63 @@ public class ListPlaylists extends Activity {
 
 		if( folderName == null ){
 			/* Mise a jour contenu liste */
-			connection.executeCommand(new MopidyDefaultCommandCallback() {
-				@Override
-				public void success(List<String> results) {
-					ListPlaylists.playlistTree.getSubTrees().clear();
-					values.clear();
-					
-					/* Creating the tree */
-					for (String result : results) {
-						if (result.startsWith("playlist: ")) {
-							String[] words = result.substring("playlist: ".length())
-									.split("\\| ");
-							ListPlaylists.playlistTree.addPlaylist(words, result.substring("playlist: ".length()));
-						}
-						if (result.equals("OK"))
-							break;
-					}
-					
-					for( PlaylistItem item : ListPlaylists.playlistTree.getSubTrees() ){
-						values.add(item);
-	//					adapter.add(item);
-					}
-					
-					adapter.notifyDataSetChanged();
-				}
-			}, "listplaylists");
+			updateSongList();
 		}
 		
 		/*
 		 * Each 500ms, a the message with the current title will be updated;
 		 */
 		// repeatedHandler.post(newRunnable);
-		repeatedHandler.postDelayed(newRunnable, 500);
+		repeatedHandler.postDelayed(newRunnable, 800);
+		
+		BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	        @Override
+	        public void onReceive(Context context, Intent intent) {
+	            updateSongList();
+	            repeatedHandler.postDelayed(newRunnable, 800);
+	        }
+	    };
+	    IntentFilter progressfilter = new IntentFilter(ListPlaylists.EVENT_CONFIGURATION_UPDATED);
+	    registerReceiver(broadcastReceiver,progressfilter);
+	}
+	
+	public void updateSongList(){
+		connection.executeCommand(new MopidyCommandCallback() {
+			@Override
+			public void success(List<String> results) {
+				ListPlaylists.playlistTree.getSubTrees().clear();
+				values.clear();
+				
+				/* Creating the tree */
+				for (String result : results) {
+					if (result.startsWith("playlist: ")) {
+						String[] words = result.substring("playlist: ".length())
+								.split("\\| ");
+						ListPlaylists.playlistTree.addPlaylist(words, result.substring("playlist: ".length()));
+					}
+					if (result.equals("OK"))
+						break;
+				}
+				
+				for( PlaylistItem item : ListPlaylists.playlistTree.getSubTrees() ){
+					values.add(item);
+//					adapter.add(item);
+				}
+
+				loadingText.setVisibility(View.GONE);
+				errorText.setVisibility(View.GONE);
+				listViewLayout.setVisibility(View.VISIBLE);
+				adapter.notifyDataSetChanged();
+			}
+				
+			@Override
+			public void error(Throwable error, String... commands){
+				loadingText.setVisibility(View.GONE);
+				listViewLayout.setVisibility(View.GONE);
+				errorText.setText(error.getMessage());
+				errorText.setVisibility(View.VISIBLE);
+			}
+		}, "listplaylists");
 	}
 
 	// @see :
@@ -322,7 +372,7 @@ public class ListPlaylists extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void showPlaylistItemPopup(final Activity context, final String playlist) {
+	private void showPlaylistItemPopup(final Activity context, final String playlist, final String shortName) {
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
@@ -349,6 +399,7 @@ public class ListPlaylists extends Activity {
 				public void onClick(View v) {
 					Intent intent = new Intent(ListPlaylists.this, ListSongsInPlaylist.class);
 					intent.putExtra("playlist-name", playlist);
+					intent.putExtra("playlist-shortname", shortName);
 					startActivity(intent);
 					popup.dismiss();
 				}

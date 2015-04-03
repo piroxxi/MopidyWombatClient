@@ -32,7 +32,9 @@ public class ControlBarFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-
+		if(ListPlaylists.connection.getContext() == null)
+			ListPlaylists.connection.setContext(this.getActivity().getApplicationContext());
+		
 		// Retrieve the current state from the server
 		ListPlaylists.connection.executeCommand(new MopidyDefaultCommandCallback() {
 			@Override

@@ -7,10 +7,33 @@
 
     <!-- The main content view -->
 
+    <TextView
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:paddingTop="16dp"
+        android:text="@string/loading"
+        android:textColor="@color/text"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:paddingTop="16dp"
+        android:visibility="gone"
+        android:text=""
+        android:textColor="@color/text"
+        android:textSize="18sp" />
+
     <LinearLayout
+        android:id="@+id/list_view_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/background"
+        android:visibility="gone"
         android:orientation="vertical" >
         <ListView
             android:id="@+id/list"

@@ -5,6 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
 	android:background="@drawable/bottomborder"
+    android:paddingBottom="6dp"
+    android:paddingTop="3dp"
     android:weightSum="11" >
 
     <ImageView
@@ -19,6 +21,7 @@
         android:id="@+id/folderName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_weight="10"
         android:paddingBottom="3dp"
         android:paddingLeft="5dp"

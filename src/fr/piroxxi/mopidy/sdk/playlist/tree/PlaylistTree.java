@@ -13,7 +13,6 @@ public class PlaylistTree extends PlaylistItem {
 
 	public void addPlaylist(String[] words, String playlistName) {
 		if (words.length > 1) {
-			System.out.println(Arrays.asList(words));
 			for (PlaylistItem item : subTrees) {
 				if (!item.getPlaylistName().equals(words[0]))
 					continue;

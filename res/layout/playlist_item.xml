@@ -4,14 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
-	android:background="@drawable/bottomborder"
+    android:background="@drawable/bottomborder"
+    android:paddingBottom="6dp"
+    android:paddingTop="3dp"
     android:weightSum="11" >
 
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_margin="3dp"
+        android:layout_margin="5dp"
+        android:layout_marginBottom="9dp"
         android:contentDescription="@string/playlist_icon"
         android:src="@drawable/playlist_icon" />
 
@@ -19,6 +22,7 @@
         android:id="@+id/playlistName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_weight="10"
         android:paddingBottom="3dp"
         android:paddingLeft="5dp"

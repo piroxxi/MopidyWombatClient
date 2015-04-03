@@ -8,18 +8,24 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, Long> {
-	
+	private Context context;
 	private String serverAddress;
 	private String port;
 	private MopidyCommandCallback callback;
 	
 	private ArrayList<String> lines;
+	private Throwable error;
+	private String[] actions;
 
-	public MopidyConnectionAsychronousTask(String serverAddress, String port, MopidyCommandCallback callback){
+	public MopidyConnectionAsychronousTask(Context context, String serverAddress, String port, MopidyCommandCallback callback){
+		this.context = context;
 		this.serverAddress = serverAddress;
 		this.port = port;
 		this.callback = callback;
@@ -28,8 +34,14 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 	
 	@Override
 	protected Long doInBackground(String... actions) {
+		this.actions = actions;
 		if(actions.length < 1){
 			callback.error(new Throwable("The actions list is empty"));
+			return (long) -1;
+		}
+		
+		if( !isOnline() ){
+			callback.error(new Throwable("Not connected to internet"));
 			return (long) -1;
 		}
 		
@@ -69,22 +81,37 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 			clientSocket.close();
 
 			return (long) 0;
+		} catch (IOException ioe) {
+			if("Timeout: Server hasn't answered in 10sec.".equals(ioe.getMessage())){
+				error = new Throwable("Server is reachable, but may not be running an mpd application !");
+			} else {
+				error = ioe;
+			}
 		} catch (Exception e) {
-			if (callback != null)
-				callback.error(e, actions);
-			else
-				Log.e("Mopidy",
-						"An error occured while executing one of the commands "
-								+ Arrays.toString(actions), e);
-
-			return (long) -1;
+			error = e;
+			Log.e("Mopidy",
+					"An error occured while executing one of the commands "
+							+ Arrays.toString(actions), e);
 		}
+		return (long) -1;
 	}
 
+	private boolean isOnline() {
+		if( context == null ) return false;
+	    ConnectivityManager cm =
+	        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+	    return netInfo != null && netInfo.isConnectedOrConnecting();
+	}
+	
 	@Override
 	public void onPostExecute(Long result) {
-		if(callback != null)
-			callback.success(lines);
+		if(callback != null){
+			if( result == 0 )
+				callback.success(lines);
+			else
+				callback.error(error, actions);
+		}
 	}
 
 	private void waitUntilReady(BufferedReader inFromServer)

@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -36,6 +35,8 @@ public class ListSongsInPlaylist extends Activity {
 	}
 	
 	private String playlistName;
+	private String playlistShortname;
+	private boolean currentPlaylist;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +48,21 @@ public class ListSongsInPlaylist extends Activity {
 		String port = settings.getString("port", "6600");
 		connection.setAddress(addresse);
 		connection.setPort(port);
+		connection.setContext(this.getApplicationContext());
 		
 		// Get ListView object from xml
 		ListView listView = (ListView) findViewById(R.id.list);
 
 		Intent intent = getIntent();
 		playlistName = intent.getStringExtra("playlist-name");
-		setTitle(playlistName);
+		playlistShortname = intent.getStringExtra("playlist-shortname");
+		currentPlaylist = "CURRENT_SONGS".equals(playlistName);
+		
+		if( currentPlaylist ){
+			setTitle("Current Playlist");
+		}else{
+			setTitle(playlistShortname);
+		}
 		
 		// new adapter to be updated
 		adapter = new ArrayAdapter<String>(this, R.layout.left_drawer_item, values);
@@ -62,14 +71,23 @@ public class ListSongsInPlaylist extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				connection.executeCommand(new MopidyDefaultCommandCallback() {
-					
-					@Override
-					public void success(List<String> results) {
-						for(String a : results)
-							Log.d("piroxxi","=>"+a);
-					}
-				}, "clear", "load \"" + playlistName + "\"", "play "+position);
+				if( currentPlaylist ){
+					connection.executeCommand(new MopidyDefaultCommandCallback() {
+						
+						@Override
+						public void success(List<String> results) {
+							// Do nothing... it's a success :P (apparently)
+						}
+					}, "play "+position);
+				} else {
+					connection.executeCommand(new MopidyDefaultCommandCallback() {
+						
+						@Override
+						public void success(List<String> results) {
+							// Do nothing... it's a success :P
+						}
+					}, "clear", "load \"" + playlistName + "\"", "play "+position);
+				}
 			}
 		});
 		
@@ -108,6 +126,6 @@ public class ListSongsInPlaylist extends Activity {
 				
 				adapter.notifyDataSetChanged();
 			}
-		}, "listplaylistinfo \""+playlistName+"\"");
+		}, ((currentPlaylist)?"playlistinfo ":"listplaylistinfo \""+playlistName+"\"") );
 	}
 }
