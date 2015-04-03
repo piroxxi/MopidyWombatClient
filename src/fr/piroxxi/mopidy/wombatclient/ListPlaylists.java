@@ -60,12 +60,7 @@ public class ListPlaylists extends Activity {
 	private ArrayList<PlaylistItem> values = new ArrayList<PlaylistItem>();
 	
 	private ArrayAdapter<String> menuAdapter;
-	private ArrayList<String> menuValues = new ArrayList<String>();
-	{
-		menuValues.add("Playlist en cours");
-		menuValues.add("Toutes les playlists");
-		menuValues.add("Préferences");
-	}
+	private ArrayList<String> menuValues;
 
 	public static MopidyConnection connection = new MopidyConnection("192.168.0.9", "6600");
 
@@ -252,6 +247,10 @@ public class ListPlaylists extends Activity {
 		};
 		listView.setAdapter(adapter);
 
+		menuValues = new ArrayList<String>();
+		menuValues.add( getString(R.string.current_playlist) );
+		menuValues.add( getString(R.string.all_playlists) );
+		menuValues.add( getString(R.string.action_settings) );
 		menuAdapter = new ArrayAdapter<String>(this,
 				R.layout.left_drawer_item, menuValues);
 		menuListView.setAdapter(menuAdapter);
@@ -281,17 +280,17 @@ public class ListPlaylists extends Activity {
 						R.color.selected_menu_item));
 				menuListView.setOnItemClickListener(new OnItemClickListener() {
 				    public void onItemClick(AdapterView<?> parent, View v, int position, long id){
-				    	if( "Préferences".equals(menuListView.getItemAtPosition(position)) ){
+				    	if( position == 0 ){
+				    		Intent intent = new Intent(ListPlaylists.this, ListSongsInPlaylist.class);
+				    		intent.putExtra("playlist-name", "CURRENT_SONGS");
+				    		startActivity(intent);
+				    		menuLayout.closeDrawers();
+				    	}
+				    	if( position == 2 ){
 				    		Intent intent = new Intent(ListPlaylists.this, PreferenceActivity.class);
 				    		startActivity(intent);
 				    		menuLayout.closeDrawers();
 				    	}
-				        if( "Playlist en cours".equals(menuListView.getItemAtPosition(position)) ){
-							Intent intent = new Intent(ListPlaylists.this, ListSongsInPlaylist.class);
-							intent.putExtra("playlist-name", "CURRENT_SONGS");
-							startActivity(intent);
-							menuLayout.closeDrawers();
-				        }
 				    }
 				});
 			}

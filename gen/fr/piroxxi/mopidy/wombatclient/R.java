@@ -107,33 +107,34 @@ public final class R {
         public static final int main=0x7f080001;
     }
     public static final class string {
-        public static final int action_settings=0x7f060002;
+        public static final int action_settings=0x7f060001;
+        public static final int all_playlists=0x7f060017;
         public static final int app_name=0x7f060000;
-        public static final int button_add_description=0x7f06000a;
-        public static final int button_inspect_description=0x7f06000c;
-        public static final int button_play_description=0x7f06000b;
-        public static final int drawer_close=0x7f060009;
-        public static final int drawer_open=0x7f060008;
-        public static final int folder_icon=0x7f060019;
-        public static final int hello_world=0x7f060001;
-        public static final int loading=0x7f06001a;
-        public static final int next=0x7f060010;
-        public static final int play=0x7f06000e;
-        public static final int playlist_icon=0x7f060018;
-        public static final int previous=0x7f06000d;
-        public static final int random=0x7f060013;
-        public static final int repeat=0x7f060012;
-        public static final int save=0x7f060016;
-        public static final int server_address=0x7f060014;
-        public static final int server_port=0x7f060015;
-        public static final int stop=0x7f06000f;
-        public static final int title_activity_list_songs_in_playlist=0x7f060007;
-        public static final int title_activity_main=0x7f060003;
-        public static final int title_activity_preferences=0x7f060017;
-        public static final int title_section1=0x7f060004;
-        public static final int title_section2=0x7f060005;
-        public static final int title_section3=0x7f060006;
-        public static final int volume=0x7f060011;
+        public static final int button_add_description=0x7f060005;
+        public static final int button_inspect_description=0x7f060007;
+        public static final int button_play_description=0x7f060006;
+        public static final int current_playlist=0x7f060016;
+        public static final int drawer_close=0x7f060004;
+        public static final int drawer_open=0x7f060003;
+        public static final int error_action_list_empty=0x7f060018;
+        public static final int error_from_server=0x7f06001a;
+        public static final int error_not_connected=0x7f060019;
+        public static final int error_timeout=0x7f06001b;
+        public static final int folder_icon=0x7f060014;
+        public static final int loading=0x7f060015;
+        public static final int next=0x7f06000b;
+        public static final int play=0x7f060009;
+        public static final int playlist_icon=0x7f060013;
+        public static final int previous=0x7f060008;
+        public static final int random=0x7f06000e;
+        public static final int repeat=0x7f06000d;
+        public static final int save=0x7f060011;
+        public static final int server_address=0x7f06000f;
+        public static final int server_port=0x7f060010;
+        public static final int stop=0x7f06000a;
+        public static final int title_activity_list_songs_in_playlist=0x7f060002;
+        public static final int title_activity_preferences=0x7f060012;
+        public static final int volume=0x7f06000c;
     }
     public static final class style {
         /** 

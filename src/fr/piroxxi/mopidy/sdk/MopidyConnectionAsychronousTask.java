@@ -13,6 +13,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
+import fr.piroxxi.mopidy.wombatclient.R;
 
 public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, Long> {
 	private Context context;
@@ -36,12 +37,12 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 	protected Long doInBackground(String... actions) {
 		this.actions = actions;
 		if(actions.length < 1){
-			callback.error(new Throwable("The actions list is empty"));
+			error = new Throwable(context.getString(R.string.error_action_list_empty));
 			return (long) -1;
 		}
 		
 		if( !isOnline() ){
-			callback.error(new Throwable("Not connected to internet"));
+			error = new Throwable(context.getString(R.string.error_not_connected));
 			return (long) -1;
 		}
 		
@@ -81,19 +82,11 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 			clientSocket.close();
 
 			return (long) 0;
-		} catch (IOException ioe) {
-			if("Timeout: Server hasn't answered in 10sec.".equals(ioe.getMessage())){
-				error = new Throwable("Server is reachable, but may not be running an mpd application !");
-			} else {
-				error = ioe;
-			}
 		} catch (Exception e) {
 			error = e;
-			Log.e("Mopidy",
-					"An error occured while executing one of the commands "
-							+ Arrays.toString(actions), e);
+			Log.e("Mopidy", "An error occured while executing one of the commands "+Arrays.toString(actions), e);
+			return (long) -1;
 		}
-		return (long) -1;
 	}
 
 	private boolean isOnline() {
@@ -122,7 +115,7 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 			Thread.sleep(10);
 		}
 		if (!inFromServer.ready()) {
-			throw new IOException("Timeout: Server hasn't answered in 10sec.");
+			throw new IOException(context.getString(R.string.error_timeout));
 		}
 	}
 
@@ -134,6 +127,6 @@ public class MopidyConnectionAsychronousTask extends AsyncTask<String, Integer, 
 		if (line.startsWith("OK MPD"))
 			return;
 
-		throw new IOException("received an error from server : " + line);
+		throw new IOException(context.getString(R.string.error_from_server)+""+line);
 	}
 }
