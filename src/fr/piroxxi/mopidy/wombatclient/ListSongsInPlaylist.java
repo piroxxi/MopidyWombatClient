@@ -59,7 +59,7 @@ public class ListSongsInPlaylist extends Activity {
 		currentPlaylist = "CURRENT_SONGS".equals(playlistName);
 		
 		if( currentPlaylist ){
-			setTitle("Current Playlist");
+			setTitle(R.string.current_playlist);
 		}else{
 			setTitle(playlistShortname);
 		}
