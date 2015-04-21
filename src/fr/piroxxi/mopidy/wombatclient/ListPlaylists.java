@@ -250,6 +250,7 @@ public class ListPlaylists extends Activity {
 		menuValues = new ArrayList<String>();
 		menuValues.add( getString(R.string.current_playlist) );
 		menuValues.add( getString(R.string.all_playlists) );
+		menuValues.add( getString(R.string.search) );
 		menuValues.add( getString(R.string.action_settings) );
 		menuAdapter = new ArrayAdapter<String>(this,
 				R.layout.left_drawer_item, menuValues);
@@ -287,6 +288,11 @@ public class ListPlaylists extends Activity {
 				    		menuLayout.closeDrawers();
 				    	}
 				    	if( position == 2 ){
+				    		Intent intent = new Intent(ListPlaylists.this, SearchActivity.class);
+				    		startActivity(intent);
+				    		menuLayout.closeDrawers();
+				    	}
+				    	if( position == 3 ){
 				    		Intent intent = new Intent(ListPlaylists.this, PreferenceActivity.class);
 				    		startActivity(intent);
 				    		menuLayout.closeDrawers();

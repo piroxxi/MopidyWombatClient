@@ -26,6 +26,7 @@
 
     <string name="current_playlist">Playlist en cours</string>
     <string name="all_playlists">Toutes mes playlists</string>
+    <string name="search">Rechercher</string>
 
 	<string name="error_action_list_empty">La liste des actions a envoyer est vide</string>
 	<string name="error_not_connected">Aucune connection internet</string>
